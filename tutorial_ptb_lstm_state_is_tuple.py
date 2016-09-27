@@ -193,14 +193,14 @@ def main(_):
         """
         print("\nnum_steps : %d, is_training : %s, reuse : %s" %
                                                 (num_steps, is_training, reuse))
-        initializer = tf.random_uniform_initializer(init_scale, init_scale)
+        initializer = tf.random_uniform_initializer(-init_scale, init_scale)
         with tf.variable_scope("model", reuse=reuse):
             tl.layers.set_name_reuse(reuse)
             network = tl.layers.EmbeddingInputlayer(
                         inputs = x,
                         vocabulary_size = vocab_size,
                         embedding_size = hidden_size,
-                        E_init = tf.random_uniform_initializer(-init_scale, init_scale),
+                        E_init = initializer,
                         name ='embedding_layer')
             if is_training:
                 network = tl.layers.DropoutLayer(network, keep=keep_prob, name='drop1')
@@ -208,7 +208,7 @@ def main(_):
                         cell_fn=tf.nn.rnn_cell.BasicLSTMCell,
                         cell_init_args={'forget_bias': 0.0, 'state_is_tuple': True},
                         n_hidden=hidden_size,
-                        initializer=tf.random_uniform_initializer(-init_scale, init_scale),
+                        initializer=initializer,
                         n_steps=num_steps,
                         return_last=False,
                         name='basic_lstm_layer1')
@@ -219,7 +219,7 @@ def main(_):
                         cell_fn=tf.nn.rnn_cell.BasicLSTMCell,
                         cell_init_args={'forget_bias': 0.0, 'state_is_tuple': True},
                         n_hidden=hidden_size,
-                        initializer=tf.random_uniform_initializer(-init_scale, init_scale),
+                        initializer=initializer,
                         n_steps=num_steps,
                         return_last=False,
                         return_seq_2d=True,
@@ -233,8 +233,8 @@ def main(_):
                 network = tl.layers.DropoutLayer(network, keep=keep_prob, name='drop3')
             network = tl.layers.DenseLayer(network,
                         n_units=vocab_size,
-                        W_init=tf.random_uniform_initializer(-init_scale, init_scale),
-                        b_init=tf.random_uniform_initializer(-init_scale, init_scale),
+                        W_init=initializer,
+                        b_init=initializer,
                         act = tf.identity, name='output_layer')
         return network, lstm1, lstm2
 
